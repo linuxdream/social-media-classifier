@@ -1,0 +1,122 @@
+<!DOCTYPE HTML>
+<!--
+	Identity by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>MCS-DS CS-410 Final Project</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="assets/js/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="assets/css/main.css" />
+        <link rel="stylesheet" href="assets/css/pnotify.custom.min.css">
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+
+        <!-- Include jquery -->
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+	</head>
+	<body class="is-loading">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<section id="main">
+						<header>
+							<!-- <span class="avatar"><img src="images/avatar.jpg" alt="" /></span> -->
+							<h1>Social Media Bullying Analyzer</h1>
+							<p>A MCS-DS CS-410 Project</p>
+						</header>
+
+						<hr />
+						<!-- <h2>Please enter a Facebook profile URL</h2> -->
+						<form method="post" action="javascript:;">
+							<div class="field">
+								<input type="text" name="fbaccount" id="fbaccount" autocomplete="off" disabled placeholder="Facebook Search" />
+							</div>
+
+                            <div class="selected-account" id="selected-account">
+
+                            </div>
+
+							<ul class="actions">
+								<li><a href="#" class="button" id="analyze">Begin Assessment</a></li>
+							</ul>
+						</form>
+						<hr />
+
+                        <div id="results-container" style="display: none;">
+                            <h2>Overall Results</h2>
+                            <div>
+                                <p>
+                                    Total comments: <span id="results-total-comments"></span><br>
+                                    Total marked as bullying: <span id="results-total-bullying"></span>
+                                </p>
+
+                            </div>
+
+                            <hr>
+
+                            <h2>Detailed Results</h2>
+                            <div>
+                                <table style="width: 100%">
+                                    <thead>
+                                        <tr>
+                                            <th>Comment</th>
+                                            <th>Bullying?</th>
+                                            <th>P(Bullying)</th>
+											<th>Report!</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="results-tbody">
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+						<footer>
+							<!-- <ul class="icons">
+								<li><a href="#" class="fa-twitter">Twitter</a></li>
+								<li><a href="#" class="fa-instagram">Instagram</a></li>
+								<li><a href="#" class="fa-facebook">Facebook</a></li>
+							</ul> -->
+						</footer>
+					</section>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<ul class="copyright">
+							<li>MCS-DS</li>
+                            <li>CS-410 Project</li>
+                            <li>Brandon Ching, PhD</li>
+                            <li>Il jo Yoo</li>
+                            <li>Yingying Tang, PhD</li>
+						</ul>
+					</footer>
+
+			</div>
+
+		    <!-- Scripts -->
+			<!--[if lte IE 8]><script src="assets/js/respond.min.js"></script><![endif]-->
+			<script>
+				if ('addEventListener' in window) {
+					window.addEventListener('load', function() { document.body.className = document.body.className.replace(/\bis-loading\b/, ''); });
+					document.body.className += (navigator.userAgent.match(/(MSIE|rv:11\.0)/) ? ' is-ie' : '');
+				}
+			</script>
+
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.4/lodash.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.16.0/moment.min.js"></script>
+            <script src="assets/js/pnotify.custom.min.js"></script>
+            <script src="assets/js/async.min.js"></script>
+            <script src="assets/js/scripts/main.js"></script>
+
+	</body>
+</html>
