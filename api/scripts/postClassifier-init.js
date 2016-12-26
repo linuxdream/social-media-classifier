@@ -17,7 +17,7 @@ Natural.PorterStemmer.attach();
 let data = '';
 
 // Create a read stream from the training data XML file. It's big...11MB
-let rs = fs.createReadStream( 'data/training_portland_coding.json', 'utf8' );
+let rs = fs.createReadStream( 'data/training_data/training_portland_coding.json', 'utf8' );
 
 // Concat it all together
 rs.on( 'data', function ( chunk ) {
@@ -39,7 +39,6 @@ rs.on( 'end', function () {
 
         // The slang to normal text array of objects
         let slangArray = JSON.parse( slang );
-        let bullyCounter = 0;
 
         // Loop through the FORMSPRINGID array.
         trainingPortland.forEach( function ( data ) {
@@ -61,7 +60,7 @@ rs.on( 'end', function () {
         } );
 
         // Save it so we can use it when requests come in from the FE.
-        Classifier.save( 'data/classifier.json', function ( err, classifier ) {
+        Classifier.save( 'data/postClassifier.json', function ( err, classifier ) {
             if ( err ) {
                 process.exit( err );
             } else {

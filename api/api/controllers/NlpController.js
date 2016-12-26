@@ -9,52 +9,46 @@ let async = require( 'async' );
 let Natural = require( 'natural' );
 
 module.exports = {
-    assess: function ( req, res ) {
+    assessPosts: function ( req, res ) {
         /**
          * We are expecting an array of documents. Make sure they have passed that
          */
-        let comments = _.get( req, 'body.comments', false );
+        let posts = _.get( req, 'body.posts', false );
 
         //Make sure they passed actual data
-        if ( comments && _.isArray( comments ) && comments.length ) {
+        if ( posts && _.isArray( posts ) && posts.length ) {
             //Prep the stemmer
             Natural.PorterStemmer.attach();
 
             //Setup the results
-            let commentResults = {
+            let postResults = {
                 total: 0,
-                totalBullying: 0,
                 results: []
             };
 
             //Temp token holder
             let tmpToken = [];
 
-            Natural.BayesClassifier.load( process.cwd() + '/scripts/data/classifier.json', null, ( err, classifier ) => {
+            Natural.BayesClassifier.load( process.cwd() + '/scripts/data/postClassifier.json', null, ( err, classifier ) => {
                 if ( err ) {
                     return res.serverError( err );
                 }
 
-                let tokenizedComment = [];
+                let tokenizedPost = [];
 
-                //Loop through the comments
-                async.each( comments, function ( comment, callback ) {
-                    tokenizedComment = Natural.PorterStemmer.tokenizeAndStem( comment.replace( /[^a-zA-Z0-9 -]/, '' ) );
-
-                    let res = false;
-                    if ( classifier.classify( tokenizedComment ) === 'bullying' ) {
-                        res = true;
-                        //Add to bullying count
-                        commentResults.totalBullying++;
-                    }
+                //Loop through the posts
+                async.each( posts, function ( post, callback ) {
+                    tokenizedPost = Natural.PorterStemmer.tokenizeAndStem( post.replace( /[^a-zA-Z0-9 -]/, '' ) );
 
                     //Increment counter
-                    commentResults.total++;
+                    postResults.total++;
+                    let group = classifier.classify( tokenizedPost );
+                    console.log( group );
+                    let classifications = classifier.getClassifications( tokenizedPost );
 
-                    let classifications = classifier.getClassifications( tokenizedComment );
-                    commentResults.results.push( {
-                        comment: comment,
-                        isBully: res,
+                    postResults.results.push( {
+                        post: post,
+                        group: group,
                         classifications: classifications
                     } );
                     callback();
@@ -63,33 +57,33 @@ module.exports = {
                         return res.serverError( err );
                     }
 
-                    return res.jsonx( commentResults );
+                    return res.jsonx( postResults );
                 } );
             } );
         } else {
-            return res.serverError( 'No comments passed.' );
+            return res.serverError( 'No posts passed.' );
         }
     },
 
-    classify: function ( req, res ) {
-        if ( !req.body.comment || !_.has( req.body, 'isBully' ) ) {
-            return res.serverError( 'Body has to have properties comment and isBully' );
+    classifyPosts: function ( req, res ) {
+        if ( !req.body.post || !_.has( req.body, 'isBully' ) ) {
+            return res.serverError( 'Body has to have properties post and isBully' );
         }
 
         // read from disk
-        Natural.BayesClassifier.load( process.cwd() + '/scripts/data/classifier.json', null, ( err, classifier ) => {
+        Natural.BayesClassifier.load( process.cwd() + '/scripts/data/postClassifier.json', null, ( err, classifier ) => {
             if ( err ) {
                 return res.serverError( err );
             }
 
             if ( req.body.isBully ) {
-                classifier.addDocument( Natural.PorterStemmer.tokenizeAndStem( req.body.comment.replace( /[^a-zA-Z0-9 -]/, '' ) ), 'bullying' );
+                classifier.addDocument( Natural.PorterStemmer.tokenizeAndStem( req.body.post.replace( /[^a-zA-Z0-9 -]/, '' ) ), 'bullying' );
             } else {
-                classifier.addDocument( Natural.PorterStemmer.tokenizeAndStem( req.body.comment.replace( /[^a-zA-Z0-9 -]/, '' ) ), 'non-bullying' );
+                classifier.addDocument( Natural.PorterStemmer.tokenizeAndStem( req.body.post.replace( /[^a-zA-Z0-9 -]/, '' ) ), 'non-bullying' );
             }
 
             // persist to disk
-            classifier.save( process.cwd() + '/scripts/data/classifier.json', function ( err ) {
+            classifier.save( process.cwd() + '/scripts/data/postClassifier.json', function ( err ) {
                 if ( err ) {
                     return res.serverError( err );
                 } else {
