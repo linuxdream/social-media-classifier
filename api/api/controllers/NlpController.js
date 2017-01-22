@@ -33,13 +33,14 @@ module.exports = {
                 if ( err ) {
                     return res.serverError( err );
                 }
-
+                console.log( classifier );
                 let tokenizedPost = [];
 
                 //Loop through the posts
                 async.each( posts, function ( post, callback ) {
+                    console.log( 1 );
                     tokenizedPost = Natural.PorterStemmer.tokenizeAndStem( post.replace( /[^a-zA-Z0-9 -]/, '' ) );
-
+                    console.log( 2 );
                     //Increment counter
                     postResults.total++;
                     let group = classifier.classify( tokenizedPost );

@@ -8,7 +8,8 @@ let _ = require( 'lodash' );
 let fs = require( 'fs' );
 
 // Init our classifier for later use.
-let Classifier = new Natural.BayesClassifier();
+// let Classifier = new Natural.BayesClassifier();
+let Classifier = new Natural.LogisticRegressionClassifier();
 
 // Use the PorterStemmer and set to attach mode.
 Natural.PorterStemmer.attach();
@@ -28,9 +29,6 @@ rs.on( 'data', function ( chunk ) {
 rs.on( 'end', function () {
     let trainingPortland = JSON.parse( data );
 
-    // Start the classifier training...
-    Classifier.train();
-
     // Let's replace slang words with their real meaning.
     fs.readFile( 'data/slang.json', 'utf8', ( err, slang ) => {
         if ( err ) {
@@ -44,20 +42,24 @@ rs.on( 'end', function () {
         trainingPortland.forEach( function ( data ) {
             let message = data.post.replace( /[^a-zA-Z0-9 -]/, '' )
                 .replace( /\\r\\n/, '' );
-            let slangPattern = null;
-
-            _.each( slangArray, ( s ) => {
-                slangPattern = new RegExp( '/\w?' + s.slang.replace( '*', '\\*' )
-                    .replace( '?', '\\?' )
-                    .replace( '/', '\\/' )
-                    .replace( '|', '\\|' ) + '\w?/' );
-                if ( s.slang.length && message.search( slangPattern ) != -1 ) {
-                    message.replace( s.slang, s.words );
-                }
-            } );
-
-            Classifier.addDocument( Natural.PorterStemmer.tokenizeAndStem( message ), data.code );
+            // let slangPattern = null;
+            //
+            // _.each( slangArray, ( s ) => {
+            //     slangPattern = new RegExp( '/\w?' + s.slang.replace( '*', '\\*' )
+            //         .replace( '?', '\\?' )
+            //         .replace( '/', '\\/' )
+            //         .replace( '|', '\\|' ) + '\w?/' );
+            //     if ( s.slang.length && message.search( slangPattern ) != -1 ) {
+            //         message.replace( s.slang, s.words );
+            //     }
+            // } );
+            if ( data.code !== 'Contest' ) {
+                Classifier.addDocument( Natural.PorterStemmer.tokenizeAndStem( message ), data.code );
+            }
         } );
+
+        // Start the classifier training...
+        Classifier.train();
 
         // Save it so we can use it when requests come in from the FE.
         Classifier.save( 'data/postClassifier.json', function ( err, classifier ) {
