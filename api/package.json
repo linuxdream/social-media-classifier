@@ -6,6 +6,7 @@
   "keywords": [],
   "dependencies": {
     "async": "^2.1.2",
+    "byline": "^5.0.0",
     "cheerio": "^0.22.0",
     "ejs": "2.3.4",
     "grunt": "1.0.1",
@@ -40,5 +41,13 @@
     "url": "git://github.com/ching/bullying-api.git"
   },
   "author": "ching",
-  "license": ""
+  "license": "",
+  "devDependencies": {
+    "babel-eslint": "^7.1.1",
+    "eslint": "^3.14.1",
+    "eslint-config-standard": "^6.2.1",
+    "eslint-plugin-html": "^2.0.0",
+    "eslint-plugin-promise": "^3.4.0",
+    "eslint-plugin-standard": "^2.0.1"
+  }
 }

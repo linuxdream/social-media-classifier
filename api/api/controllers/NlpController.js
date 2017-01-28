@@ -7,6 +7,7 @@
  */
 let async = require( 'async' );
 let Natural = require( 'natural' );
+let tokenizer = new Natural.WordTokenizer();
 
 module.exports = {
     assessPosts: function ( req, res ) {
@@ -28,30 +29,56 @@ module.exports = {
 
             //Temp token holder
             let tmpToken = [];
+            let fs = require('fs');
 
-            Natural.BayesClassifier.load( process.cwd() + '/scripts/data/postClassifier.json', null, ( err, classifier ) => {
+            fs.readFile( process.cwd() + '/scripts/data/emotionwords.json', null, ( err, words ) => {
                 if ( err ) {
                     return res.serverError( err );
                 }
-                console.log( classifier );
-                let tokenizedPost = [];
+
+                let wordsMap = UtilsService.objToStrMap(JSON.parse(words));
 
                 //Loop through the posts
                 async.each( posts, function ( post, callback ) {
-                    console.log( 1 );
-                    tokenizedPost = Natural.PorterStemmer.tokenizeAndStem( post.replace( /[^a-zA-Z0-9 -]/, '' ) );
-                    console.log( 2 );
-                    //Increment counter
-                    postResults.total++;
-                    let group = classifier.classify( tokenizedPost );
-                    console.log( group );
-                    let classifications = classifier.getClassifications( tokenizedPost );
+                    if(post.length){
+                        let wordsArray = tokenizer.tokenize(post);
+                        let postMetrics = {
+                            'post': post,
+                            'analysis': new Map()
+                        };
 
-                    postResults.results.push( {
-                        post: post,
-                        group: group,
-                        classifications: classifications
-                    } );
+                        //Cycle through each word in the post
+                        wordsArray.forEach((word)=>{
+                            //Check if that word is present in the wordsMap
+                            if(wordsMap.has(word)){
+                                //If it is, then increment each attribute for that word
+                                let attrs = wordsMap.get(word);
+
+                                attrs.forEach((attr)=>{
+                                    if(postMetrics.analysis.has(attr)){
+                                        let newVal = postMetrics.analysis.get(attr) + 1;
+
+                                        //Increment the value
+                                        postMetrics.analysis.set(attr, newVal);
+                                    }else{
+                                        //Initialize it at one
+                                        postMetrics.analysis.set(attr, 1);
+                                    }
+                                })
+                            }
+                        });
+
+                        postMetrics.analysis.forEach((v, k)=>{
+                            let weight = v / wordsArray.length;
+                            postMetrics.analysis.set(k, weight);
+                        });
+
+                        postMetrics.analysis = UtilsService.strMapToObj(postMetrics.analysis);
+
+                        //Increment counter
+                        postResults.total++;
+                        postResults.results.push(postMetrics);
+                    }
                     callback();
                 }, function ( err ) {
                     if ( err ) {
@@ -66,31 +93,31 @@ module.exports = {
         }
     },
 
-    classifyPosts: function ( req, res ) {
-        if ( !req.body.post || !_.has( req.body, 'isBully' ) ) {
-            return res.serverError( 'Body has to have properties post and isBully' );
-        }
-
-        // read from disk
-        Natural.BayesClassifier.load( process.cwd() + '/scripts/data/postClassifier.json', null, ( err, classifier ) => {
-            if ( err ) {
-                return res.serverError( err );
-            }
-
-            if ( req.body.isBully ) {
-                classifier.addDocument( Natural.PorterStemmer.tokenizeAndStem( req.body.post.replace( /[^a-zA-Z0-9 -]/, '' ) ), 'bullying' );
-            } else {
-                classifier.addDocument( Natural.PorterStemmer.tokenizeAndStem( req.body.post.replace( /[^a-zA-Z0-9 -]/, '' ) ), 'non-bullying' );
-            }
-
-            // persist to disk
-            classifier.save( process.cwd() + '/scripts/data/postClassifier.json', function ( err ) {
-                if ( err ) {
-                    return res.serverError( err );
-                } else {
-                    return res.ok( 'ok' );
-                }
-            } );
-        } );
-    }
+    // classifyPosts: function ( req, res ) {
+    //     if ( !req.body.post || !_.has( req.body, 'isBully' ) ) {
+    //         return res.serverError( 'Body has to have properties post and isBully' );
+    //     }
+    //
+    //     // read from disk
+    //     Natural.BayesClassifier.load( process.cwd() + '/scripts/data/emotionClassifier.json', null, ( err, classifier ) => {
+    //         if ( err ) {
+    //             return res.serverError( err );
+    //         }
+    //
+    //         if ( req.body.isBully ) {
+    //             classifier.addDocument( Natural.PorterStemmer.tokenizeAndStem( req.body.post.replace( /[^a-zA-Z0-9 -]/, '' ) ), 'bullying' );
+    //         } else {
+    //             classifier.addDocument( Natural.PorterStemmer.tokenizeAndStem( req.body.post.replace( /[^a-zA-Z0-9 -]/, '' ) ), 'non-bullying' );
+    //         }
+    //
+    //         // persist to disk
+    //         classifier.save( process.cwd() + '/scripts/data/postClassifier.json', function ( err ) {
+    //             if ( err ) {
+    //                 return res.serverError( err );
+    //             } else {
+    //                 return res.ok( 'ok' );
+    //             }
+    //         } );
+    //     } );
+    // }
 };
