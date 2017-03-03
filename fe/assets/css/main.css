@@ -807,3 +807,12 @@ body.is-ie #wrapper {
     margin: auto;
     padding-bottom: 20px;
 }
+.comment {
+    width: 30%;
+}
+table {
+    text-transform: none;
+}
+td {
+    border-bottom: 1px solid;
+}

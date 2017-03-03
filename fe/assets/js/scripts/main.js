@@ -112,7 +112,7 @@ $( document )
                     ];
                     var params = {
                         since: moment( moment()
-                                .subtract( 1, 'year' ), 'YYYY-MM-DD hh:mm A' )
+                                .subtract( 3, 'months' ), 'YYYY-MM-DD hh:mm A' )
                             .unix(),
                         until: moment( moment(), 'YYYY-MM-DD hh:mm A' )
                             .unix(),
@@ -129,7 +129,7 @@ $( document )
                         } );
 
                         var allPosts = response.data;
-
+                        console.log( response );
                         if ( response.data && response.data.length ) {
                             var allComments = {
                                 "comments": []
@@ -164,69 +164,36 @@ $( document )
                                             }
                                         } )
                                         .done( function ( data ) {
+
                                             $( '#results-total-comments' )
-                                                .html( data.total );
-                                            $( '#results-total-bullying' )
-                                                .html( data.totalBullying );
+                                                .html( data.length );
 
-                                            _.each( data.results, function ( result ) {
-                                                var bullying = 'N';
+                                            _.each( data, function ( result ) {
+                                                var emotionTones = _.get( result, 'analysis.document_tone.tone_categories[0]' );
+                                                var languageTones = _.get( result, 'analysis.document_tone.tone_categories[1]' );
+                                                var socialTones = _.get( result, 'analysis.document_tone.tone_categories[2]' );
 
-                                                if ( result.isBully ) {
-                                                    bullying = 'Y';
-                                                }
+                                                var emotionResults = [];
+                                                emotionTones.tones.forEach( function ( tone ) {
+                                                    emotionResults.push( tone.tone_name + ': ' + tone.score );
+                                                } );
 
-                                                var bProbability = null;
+                                                var languageResults = [];
+                                                languageTones.tones.forEach( function ( tone ) {
+                                                    languageResults.push( tone.tone_name + ': ' + tone.score );
+                                                } );
 
-                                                _.each( result.classifications, function ( r ) {
-                                                    if ( r.label === "bullying" ) {
-                                                        bProbability = r.value;
-                                                    }
-                                                } )
+                                                var socialResults = [];
+                                                socialTones.tones.forEach( function ( tone ) {
+                                                    socialResults.push( tone.tone_name + ': ' + tone.score );
+                                                } );
 
-                                                var entry = $( '<tr><td>' + result.comment + '</td>' +
-                                                    '<td>' + bullying + '</td>' +
-                                                    '<td>' + bProbability + '</td>' +
-
+                                                var entry = $( '<tr><td>' + result.text + '</td>' +
+                                                    '<td>' + emotionResults.join( '<br/>' ) + '</td>' +
+                                                    '<td>' + languageResults.join( '<br/>' ) + '</td>' +
+                                                    '<td>' + socialResults.join( '<br/>' ) + '</td>' +
                                                     '</tr>' );
-                                                var classifyControl = $( '<td><a href="#" class="yes">Yes</a> <a href="#" class="no">No</a></td>' );
 
-                                                function classifyCb() {
-                                                    new PNotify( {
-                                                        title: 'Success',
-                                                        text: 'Thanks for your input.',
-                                                        type: 'success'
-                                                    } );
-                                                }
-                                                classifyControl.find( '.yes' )
-                                                    .click( function () {
-                                                        $.ajax( apiURL + '/nlp/classify', {
-                                                                method: 'put',
-                                                                data: {
-                                                                    comment: result.comment,
-                                                                    isBully: true
-                                                                },
-                                                                beforeSend: function ( xhr ) {
-                                                                    xhr.setRequestHeader( 'x-key', '1234567890' );
-                                                                }
-                                                            } )
-                                                            .done( classifyCb );
-                                                    } );
-                                                classifyControl.find( '.no' )
-                                                    .click( function () {
-                                                        $.ajax( apiURL + '/nlp/classify', {
-                                                                method: 'put',
-                                                                data: {
-                                                                    comment: result.comment,
-                                                                    isBully: false
-                                                                },
-                                                                beforeSend: function ( xhr ) {
-                                                                    xhr.setRequestHeader( 'x-key', '1234567890' );
-                                                                }
-                                                            } )
-                                                            .done( classifyCb );
-                                                    } );
-                                                entry.append( classifyControl );
                                                 $( '#results-tbody' )
                                                     .append( entry );
                                             } );
@@ -257,7 +224,7 @@ function searchFBAccounts( searchString, cb ) {
     if ( searchString && searchString.length > 2 ) {
         FB.api( '/search/', {
             type: 'page',
-            limit: 10,
+            limit: 5,
             fields: 'id,name,picture,link',
             q: searchString
         }, function ( response ) {

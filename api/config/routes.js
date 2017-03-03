@@ -32,18 +32,5 @@ module.exports.routes = {
      *                                                                          *
      ***************************************************************************/
 
-    'put /nlp/assessPosts': 'NlpController.assessPosts',
-
-    'put /nlp/classifyPosts': 'NlpController.classifyPosts'
-
-    /***************************************************************************
-     *                                                                          *
-     * Custom routes here...                                                    *
-     *                                                                          *
-     * If a request to a URL doesn't match any of the custom routes above, it   *
-     * is matched against Sails route blueprints. See `config/blueprints.js`    *
-     * for configuration options and examples.                                  *
-     *                                                                          *
-     ***************************************************************************/
-
+    'put /nlp/assess': 'NlpController.assess',
 };
