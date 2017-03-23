@@ -8,6 +8,14 @@
 let async = require( 'async' );
 
 module.exports = {
+    save: (req, res)=>{
+        console.log(req.body);
+        // console.log(JSON.parse(req.body));
+
+        let comments = _.get(req, 'body.comments');
+        let post = _.get(req, 'body.post');
+
+    },
     assess: function ( req, res ) {
         /**
          * We are expecting an array of documents. Make sure they have passed that

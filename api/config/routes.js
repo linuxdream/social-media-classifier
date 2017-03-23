@@ -33,4 +33,5 @@ module.exports.routes = {
      ***************************************************************************/
 
     'put /nlp/assess': 'NlpController.assess',
+    'post /nlp/save': 'NlpController.save',
 };

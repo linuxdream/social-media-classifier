@@ -129,7 +129,7 @@ $( document )
                         } );
 
                         var allPosts = response.data;
-                        console.log( response );
+
                         if ( response.data && response.data.length ) {
                             var allComments = {
                                 "comments": []
@@ -137,9 +137,13 @@ $( document )
 
                             // get detail comments
                             async.each( allPosts, function ( post, callback ) {
+
                                     if ( !post.id ) {
                                         return callback();
                                     }
+
+                                    post.message = post.message.replace(/[^A-Za-z0-9 ]/g, '');
+                                    post.comments = [];
 
                                     FB.api( '/' + post.id + '/comments', 'get', {}, function ( res ) {
                                         res.data.forEach( function ( comment ) {
@@ -147,18 +151,18 @@ $( document )
                                                 return;
                                             }
 
-                                            allComments.comments.push( comment.message );
+                                            post.comments.push( comment.message.replace(/[^A-Za-z0-9 ]/g, '') );
                                         } );
-                                        post.comments = res.data;
+
                                         callback();
                                     } );
                                 },
                                 function () {
-                                    $.ajax( apiURL + '/nlp/assess', {
-                                            method: 'put',
-                                            data: {
-                                                comments: allComments.comments
-                                            },
+                                    console.log('allposts', allPosts);
+                                    $.ajax( apiURL + '/nlp/save', {
+                                            method: 'post',
+                                            data: JSON.stringify(allPosts),
+                                            applicationType: 'application/json',
                                             beforeSend: function ( xhr ) {
                                                 // xhr.setRequestHeader( 'x-key', '1234567890' );
                                             }
